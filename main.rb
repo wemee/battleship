@@ -27,7 +27,6 @@ end
 # :r
 
 def deploy ship
-  p ship
   pos = get_rand_pos
   row_or_column = [:r, :c].sample
   if(row_or_column==:r)
@@ -82,27 +81,46 @@ $SHIPS.each {|ship|
 # }
 
 sinks = []
-sinks_board = Array.new($BOARD_SIZE[:width]) {Array.new($BOARD_SIZE[:height]) {'.'}}
+$SINKS_BOARD = Array.new($BOARD_SIZE[:width]) {Array.new($BOARD_SIZE[:height]) {'.'}}
 cnt = 0
-print "Enter Position x y: "
-while g = gets.chomp
-  cnt += 1
-  y,x = g.split(/\s/).map(&:to_i)
-  # puts "#{x}, #{y}"
-  if [:A, :B, :C, :S, :D].include?($BOARD[x][y])
-    sinks << $BOARD[x][y] unless sinks.include?($BOARD[x][y])
-    sinks_board[x][y] = $BOARD[x][y]
-  else
-    sinks_board[x][y] = 'X'
-  end
+
+def print_board board
   puts '  '+(0..9).to_a.join(' ')
-  sinks_board.each.with_index{|row, idx|
+  board.each.with_index{|row, idx|
     puts "#{idx} #{row.join(' ')}"
   }
-  if sinks.size >= 5
-    break
-  else
-    print "Enter Position x y: "
+end
+
+def print_desc
+  print_board $SINKS_BOARD
+  print "Enter Position x y: "
+end
+
+loop do
+  cnt += 1
+  print_desc
+
+  str = gets.chomp
+  if str == 'cheat'
+    print_board $BOARD
+  elsif str =~ /q|exit/
+    exit!
+  elsif str.match(/^\d\s\d$/)
+    y,x = str.split(/\s/).map(&:to_i)
+    if [:A, :B, :C, :S, :D].include?($BOARD[x][y])
+      sinks << $BOARD[x][y] unless sinks.include?($BOARD[x][y])
+      $SINKS_BOARD[x][y] = $BOARD[x][y]
+    else
+      $SINKS_BOARD[x][y] = 'X'
+    end
+
+    if sinks.size >= 5
+      break
+    else
+      print_desc
+    end
   end
 end
+
 puts "YOU WIN"
+print_board $BOARD
