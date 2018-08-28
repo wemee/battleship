@@ -22,10 +22,6 @@ def get_rand_pos w=$BOARD_SIZE[:width], h=$BOARD_SIZE[:height]
   {x: rand(w), y: rand(h)}
 end
 
-# {:name=>"驅逐艦", :label=>:D, :size=>2}
-# {:x=>0, :y=>6}
-# :r
-
 def deploy ship
   pos = get_rand_pos
   row_or_column = [:r, :c].sample
@@ -76,10 +72,6 @@ $SHIPS.each {|ship|
   deploy ship
 }
 
-# $BOARD.each{|row|
-#   puts row.join(' ')
-# }
-
 sinks = []
 $SINKS_BOARD = Array.new($BOARD_SIZE[:width]) {Array.new($BOARD_SIZE[:height]) {'.'}}
 cnt = 0
@@ -105,8 +97,8 @@ loop do
     print_board $BOARD
   elsif str =~ /q|exit/
     exit!
-  elsif str.match(/^\d\s\d$/)
-    y,x = str.split(/\s/).map(&:to_i)
+  elsif mch = str.match(/^(\d)\s?(\d)$/)
+    y,x = mch.to_a.last(2).map(&:to_i)
     if [:A, :B, :C, :S, :D].include?($BOARD[x][y])
       sinks << $BOARD[x][y] unless sinks.include?($BOARD[x][y])
       $SINKS_BOARD[x][y] = $BOARD[x][y]
@@ -114,11 +106,9 @@ loop do
       $SINKS_BOARD[x][y] = 'X'
     end
 
-    if sinks.size >= 5
-      break
-    else
-      print_desc
-    end
+    sinks.size>=5 ? break : print_desc
+  else
+    puts "輸入格式錯誤"
   end
 end
 
